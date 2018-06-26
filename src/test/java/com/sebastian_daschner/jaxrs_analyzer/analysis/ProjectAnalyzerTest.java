@@ -39,6 +39,7 @@ import java.util.stream.Stream;
 import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
 import static org.junit.Assert.*;
+import org.junit.Ignore;
 
 public class ProjectAnalyzerTest {
 
@@ -69,6 +70,7 @@ public class ProjectAnalyzerTest {
         classUnderTest = new ProjectAnalyzer(classPaths);
     }
 
+    @Ignore
     @Test
     public void test() {
         final long startTime = System.currentTimeMillis();

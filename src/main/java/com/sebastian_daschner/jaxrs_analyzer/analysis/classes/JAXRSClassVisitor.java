@@ -31,6 +31,7 @@ public class JAXRSClassVisitor extends ClassVisitor {
     private static final Class<? extends Annotation>[] RELEVANT_METHOD_ANNOTATIONS = new Class[]{Path.class, GET.class, PUT.class, POST.class, DELETE.class, OPTIONS.class, HEAD.class};
 
     private final ClassResult classResult;
+    public static boolean publicAPI = false;
 
     public JAXRSClassVisitor(final ClassResult classResult) {
         super(ASM5);
@@ -130,6 +131,12 @@ public class JAXRSClassVisitor extends ClassVisitor {
     }
 
     private static boolean hasJAXRSAnnotations(final Method method) {
+        if (publicAPI && !isAnnotationPresent(method, com.thyssenkrupp.tkse.dla.genie.rest.core.PublicAPI.class)) {
+            Class<?> clazz = method.getDeclaringClass();
+            if (!isAnnotationPresent(clazz, com.thyssenkrupp.tkse.dla.genie.rest.core.PublicAPI.class)) {
+             return false;
+            }
+        }
         for (final Object annotation : method.getDeclaredAnnotations()) {
             // TODO test both
             if (Stream.of(RELEVANT_METHOD_ANNOTATIONS).map(a -> JavaUtils.getAnnotation(method, a))

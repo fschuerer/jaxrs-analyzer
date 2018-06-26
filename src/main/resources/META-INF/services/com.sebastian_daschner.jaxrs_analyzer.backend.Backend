@@ -1,3 +1,5 @@
 com.sebastian_daschner.jaxrs_analyzer.backend.asciidoc.AsciiDocBackend
 com.sebastian_daschner.jaxrs_analyzer.backend.plaintext.PlainTextBackend
 com.sebastian_daschner.jaxrs_analyzer.backend.swagger.SwaggerBackend
+com.sebastian_daschner.jaxrs_analyzer.backend.zuul.ZuulPublicBackend
+com.sebastian_daschner.jaxrs_analyzer.backend.zuul.ZuulPrivateBackend

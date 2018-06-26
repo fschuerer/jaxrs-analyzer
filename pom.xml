@@ -2,14 +2,14 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.sebastian-daschner</groupId>
+    <groupId>com.thyssenkrupp.tkse.dla</groupId>
     <artifactId>jaxrs-analyzer</artifactId>
     <version>0.17-SNAPSHOT</version>
     <name>JAX-RS Analyzer</name>
     <packaging>jar</packaging>
 
     <description>Generates REST documentation by analysing JAX-RS projects.</description>
-    <url>https://github.com/sdaschner/jaxrs-analyzer</url>
+    <url>https://github.com/fschuerer/jaxrs-analyzer.git</url>
 
     <licenses>
         <license>
@@ -24,10 +24,23 @@
             <organization>sebastian-daschner.com</organization>
             <organizationUrl>https://www.sebastian-daschner.com</organizationUrl>
         </developer>
+        <developer>
+            <name>DLA</name>
+            <organization>thyssenkrupp.com</organization>
+        </developer>
     </developers>
 
     <dependencies>
-
+        <dependency>
+            <groupId>com.thyssenkrupp.tkse.dla</groupId>
+            <artifactId>genie</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse</groupId>
+            <artifactId>yasson</artifactId>
+            <version>1.0</version>
+        </dependency>
         <dependency>
             <groupId>org.glassfish</groupId>
             <artifactId>javax.json</artifactId>
@@ -36,7 +49,7 @@
         <dependency>
             <groupId>javax</groupId>
             <artifactId>javaee-api</artifactId>
-            <version>7.0</version>
+            <version>8.0</version>
         </dependency>
         <dependency>
             <groupId>org.ow2.asm</groupId>
@@ -91,7 +104,7 @@
                         <configuration>
                             <transformers>
                                 <transformer
-                                        implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                     <mainClass>com.sebastian_daschner.jaxrs_analyzer.Main</mainClass>
                                 </transformer>
                             </transformers>
@@ -118,21 +131,23 @@
     </properties>
 
     <scm>
-        <connection>scm:git:git@github.com:sdaschner/jaxrs-analyzer.git</connection>
-        <developerConnection>scm:git:git@github.com:sdaschner/jaxrs-analyzer.git</developerConnection>
-        <url>scm:git:git@github.com:sdaschner/jaxrs-analyzer.git</url>
+        <connection>https://github.com/fschuerer/jaxrs-analyzer.git</connection>
+        <developerConnection>https://github.com/fschuerer/jaxrs-analyzer.git</developerConnection>
+        <url>https://github.com/fschuerer/jaxrs-analyzer.git</url>
         <tag>HEAD</tag>
     </scm>
-
+    
     <distributionManagement>
-        <snapshotRepository>
-            <id>ossrh-snapshots</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
-        </snapshotRepository>
         <repository>
-            <id>ossrh</id>
-            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+            <id>releases</id>
+            <name>releases</name>
+            <url>http://www-artifactory:8081/artifactory/dla-releases</url>
         </repository>
+        <snapshotRepository>
+            <id>snapshots</id>
+            <name>snapshots</name>
+            <url>http://www-artifactory:8081/artifactory/dla-snapshots</url>
+        </snapshotRepository>
     </distributionManagement>
 
     <profiles>

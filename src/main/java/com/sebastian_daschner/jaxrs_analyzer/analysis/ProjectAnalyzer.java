@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.sebastian_daschner.jaxrs_analyzer.analysis;
 
 import com.sebastian_daschner.jaxrs_analyzer.LogProvider;
@@ -56,26 +55,33 @@ public class ProjectAnalyzer {
     // b contains interface with @Path & resource methods
     // a contains impl of iface without annotations
     // b should have result
-
     private final Lock lock = new ReentrantLock();
     private final Set<String> classes = new HashSet<>();
     private final ResultInterpreter resultInterpreter = new ResultInterpreter();
     private final BytecodeAnalyzer bytecodeAnalyzer = new BytecodeAnalyzer();
     private final JavaDocAnalyzer javaDocAnalyzer = new JavaDocAnalyzer();
+    private final boolean publicAPI;
 
     /**
-     * Creates a project analyzer with given class path locations where to search for classes.
+     * Creates a project analyzer with given class path locations where to
+     * search for classes.
      *
-     * @param classPaths The locations of additional class paths (can be directories or jar-files)
+     * @param classPaths The locations of additional class paths (can be
+     * directories or jar-files)
      */
     public ProjectAnalyzer(final Set<Path> classPaths) {
+        this(classPaths, false);
+    }
+
+    public ProjectAnalyzer(final Set<Path> classPaths, boolean publicAPI) {
         classPaths.forEach(this::addToClassPool);
+        this.publicAPI = publicAPI;
     }
 
     /**
      * Analyzes all classes in the given project path.
      *
-     * @param projectClassPaths  The project class paths
+     * @param projectClassPaths The project class paths
      * @param projectSourcePaths The project source file paths
      * @return The REST resource representations
      */
@@ -110,13 +116,16 @@ public class ProjectAnalyzer {
 
     private boolean isJAXRSRootResource(String className) {
         final Class<?> clazz = JavaUtils.loadClassFromName(className);
-        return clazz != null && (isAnnotationPresent(clazz, javax.ws.rs.Path.class) || isAnnotationPresent(clazz, ApplicationPath.class));
+        return clazz != null
+                && isAnnotationPresent(clazz, javax.ws.rs.Path.class)
+                || isAnnotationPresent(clazz, ApplicationPath.class);
     }
 
     private void analyzeClass(final String className, ClassResult classResult) {
         try {
             final ClassReader classReader = new ContextClassReader(className);
             final ClassVisitor visitor = new JAXRSClassVisitor(classResult);
+            JAXRSClassVisitor.publicAPI = publicAPI;
 
             classReader.accept(visitor, ClassReader.EXPAND_FRAMES);
         } catch (IOException e) {
@@ -131,8 +140,9 @@ public class ProjectAnalyzer {
      * @param location The location of a jar file or a directory
      */
     private void addToClassPool(final Path location) {
-        if (!location.toFile().exists())
+        if (!location.toFile().exists()) {
             throw new IllegalArgumentException("The location '" + location + "' does not exist!");
+        }
         try {
             ContextClassReader.addClassPath(location.toUri().toURL());
         } catch (Exception e) {
@@ -158,7 +168,8 @@ public class ProjectAnalyzer {
     }
 
     /**
-     * Adds all classes in the given jar-file location to the set of known classes.
+     * Adds all classes in the given jar-file location to the set of known
+     * classes.
      *
      * @param location The location of the jar-file
      */
@@ -168,8 +179,9 @@ public class ProjectAnalyzer {
             while (entries.hasMoreElements()) {
                 final JarEntry entry = entries.nextElement();
                 final String entryName = entry.getName();
-                if (entryName.endsWith(".class"))
+                if (entryName.endsWith(".class")) {
                     classes.add(toQualifiedClassName(entryName));
+                }
             }
         } catch (IOException e) {
             throw new IllegalArgumentException("Could not read jar-file '" + location + "', reason: " + e.getMessage());
@@ -177,16 +189,18 @@ public class ProjectAnalyzer {
     }
 
     /**
-     * Adds all classes in the given directory location to the set of known classes.
+     * Adds all classes in the given directory location to the set of known
+     * classes.
      *
      * @param location The location of the current directory
-     * @param subPath  The sub-path which is relevant for the package names or {@code null} if currently in the root directory
+     * @param subPath The sub-path which is relevant for the package names or
+     * {@code null} if currently in the root directory
      */
     private void addDirectoryClasses(final Path location, final Path subPath) {
         for (final File file : location.toFile().listFiles()) {
-            if (file.isDirectory())
+            if (file.isDirectory()) {
                 addDirectoryClasses(location.resolve(file.getName()), subPath.resolve(file.getName()));
-            else if (file.isFile() && file.getName().endsWith(".class")) {
+            } else if (file.isFile() && file.getName().endsWith(".class")) {
                 final String classFileName = subPath.resolve(file.getName()).toString();
                 classes.add(toQualifiedClassName(classFileName));
             }
@@ -194,7 +208,8 @@ public class ProjectAnalyzer {
     }
 
     /**
-     * Converts the given file name of a class-file to the fully-qualified class name.
+     * Converts the given file name of a class-file to the fully-qualified class
+     * name.
      *
      * @param fileName The file name (e.g. a/package/AClass.class)
      * @return The fully-qualified class name (e.g. a.package.AClass)

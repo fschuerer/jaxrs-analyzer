@@ -52,7 +52,7 @@ public class SwaggerBackend implements Backend {
     private final SwaggerOptions options = new SwaggerOptions();
 
     private Resources resources;
-    private JsonObjectBuilder builder;
+    protected JsonObjectBuilder builder;
     private SchemaBuilder schemaBuilder;
     private String projectName;
     private String projectVersion;
@@ -81,13 +81,13 @@ public class SwaggerBackend implements Backend {
         }
     }
 
-    private JsonObject modifyJson(final JsonObject json) {
+    protected JsonObject modifyJson(final JsonObject json) {
         if (options.getJsonPatch() == null)
             return json;
         return options.getJsonPatch().apply(json);
     }
 
-    private JsonObject renderInternal() {
+    protected JsonObject renderInternal() {
         appendHeader();
         appendPaths();
         appendDefinitions();
@@ -95,12 +95,12 @@ public class SwaggerBackend implements Backend {
         return builder.build();
     }
 
-    private void appendHeader() {
+    protected void appendHeader() {
         renderHeader();
         renderTags();
     }
 
-    private void renderHeader() {
+    protected void renderHeader() {
         builder.add("swagger", SWAGGER_VERSION).add("info", Json.createObjectBuilder()
                 .add("version", projectVersion).add("title", projectName))
                 .add("host", options.getDomain() == null ? "" : options.getDomain()).add("basePath", (options.getDomain() != null && !"".equals(options.getDomain().trim()) ? '/' : '/' + projectName + '/') + resources.getBasePath())
@@ -108,7 +108,7 @@ public class SwaggerBackend implements Backend {
                         .collect(Json::createArrayBuilder, JsonArrayBuilder::add, JsonArrayBuilder::add).build());
     }
 
-    private void renderTags() {
+    protected void renderTags() {
         if (options.isRenderTags()) {
             final JsonArrayBuilder tags = Json.createArrayBuilder();
             resources.getResources().stream()
@@ -120,7 +120,7 @@ public class SwaggerBackend implements Backend {
         }
     }
 
-    private String extractTag(final String s) {
+    protected String extractTag(final String s) {
         final int offset = options.getTagsPathOffset();
         final String[] parts = s.split("/");
 
@@ -130,13 +130,13 @@ public class SwaggerBackend implements Backend {
         return null;
     }
 
-    private void appendPaths() {
+    protected void appendPaths() {
         final JsonObjectBuilder paths = Json.createObjectBuilder();
         resources.getResources().stream().sorted().forEach(s -> paths.add('/' + s, buildPathDefinition(s)));
         builder.add("paths", paths);
     }
 
-    private JsonObjectBuilder buildPathDefinition(final String s) {
+    protected JsonObjectBuilder buildPathDefinition(final String s) {
         final JsonObjectBuilder methods = Json.createObjectBuilder();
         consolidateMultipleMethodsForSamePath(s)
                 .values().stream()
@@ -146,14 +146,14 @@ public class SwaggerBackend implements Backend {
         return methods;
     }
 
-    private Map<String, ResourceMethod> consolidateMultipleMethodsForSamePath(String s) {
+    protected Map<String, ResourceMethod> consolidateMultipleMethodsForSamePath(String s) {
         return resources.getMethods(s).stream().collect(
                 Collectors.groupingBy(m->m.getMethod().toString().toLowerCase(),
                         Collectors.reducing(new ResourceMethod(), ResourceMethod::combine))
         );
     }
 
-    private JsonObjectBuilder buildForMethod(final ResourceMethod method, final String s) {
+    protected JsonObjectBuilder buildForMethod(final ResourceMethod method, final String s) {
         final JsonArrayBuilder consumes = Json.createArrayBuilder();
         method.getRequestMediaTypes().stream().sorted().forEach(consumes::add);
 
@@ -177,7 +177,7 @@ public class SwaggerBackend implements Backend {
         return builder;
     }
 
-    private JsonArrayBuilder buildParameters(final ResourceMethod method) {
+    protected JsonArrayBuilder buildParameters(final ResourceMethod method) {
         final Set<MethodParameter> parameters = method.getMethodParameters();
         final JsonArrayBuilder parameterBuilder = Json.createArrayBuilder();
 
@@ -199,7 +199,7 @@ public class SwaggerBackend implements Backend {
         return parameterBuilder;
     }
 
-    private void buildParameters(final Set<MethodParameter> parameters, final ParameterType parameterType, final JsonArrayBuilder builder) {
+    protected void buildParameters(final Set<MethodParameter> parameters, final ParameterType parameterType, final JsonArrayBuilder builder) {
         parameters.stream().filter(p -> p.getParameterType() == parameterType)
                 .sorted(parameterComparator())
                 .forEach(e -> {
@@ -220,7 +220,7 @@ public class SwaggerBackend implements Backend {
                 });
     }
 
-    private JsonObjectBuilder buildResponses(final ResourceMethod method) {
+    protected JsonObjectBuilder buildResponses(final ResourceMethod method) {
         final JsonObjectBuilder responses = Json.createObjectBuilder();
 
         method.getResponses().entrySet().stream().sorted(mapKeyComparator()).forEach(e -> {
@@ -243,7 +243,7 @@ public class SwaggerBackend implements Backend {
         return responses;
     }
 
-    private void appendDefinitions() {
+    protected void appendDefinitions() {
         builder.add("definitions", schemaBuilder.getDefinitions());
     }
 
@@ -253,7 +253,7 @@ public class SwaggerBackend implements Backend {
         return NAME;
     }
 
-    private static String getSwaggerParameterType(final ParameterType parameterType) {
+    protected static String getSwaggerParameterType(final ParameterType parameterType) {
         switch (parameterType) {
             case QUERY:
                 return "query";
@@ -269,7 +269,7 @@ public class SwaggerBackend implements Backend {
         }
     }
 
-    private static byte[] serialize(final JsonObject jsonObject) {
+    protected static byte[] serialize(final JsonObject jsonObject) {
         try (final ByteArrayOutputStream output = new ByteArrayOutputStream()) {
             final Map<String, ?> config = singletonMap(JsonGenerator.PRETTY_PRINTING, true);
             final JsonWriter jsonWriter = Json.createWriterFactory(config).createWriter(output);

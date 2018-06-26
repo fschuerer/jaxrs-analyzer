@@ -44,7 +44,9 @@ public class Main {
     private static String version = DEFAULT_VERSION;
     private static String backendType = "swagger";
     private static Path outputFileLocation;
-
+    private static boolean publicAPI = false;
+    private static Path additionalResources;
+    
     /**
      * Inspects JAX-RS projects and outputs the gathered information.
      * <p>
@@ -91,7 +93,7 @@ public class Main {
         final Backend backend = JAXRSAnalyzer.constructBackend(backendType);
         backend.configure(attributes);
 
-        final JAXRSAnalyzer jaxrsAnalyzer = new JAXRSAnalyzer(projectClassPaths, projectSourcePaths, classPaths, name, version, backend, outputFileLocation);
+        final JAXRSAnalyzer jaxrsAnalyzer = new JAXRSAnalyzer(publicAPI, additionalResources, projectClassPaths, projectSourcePaths, classPaths, name, version, backend, outputFileLocation);
         jaxrsAnalyzer.analyze();
     }
 
@@ -141,6 +143,12 @@ public class Main {
                             break;
                         case "-a":
                             addAttribute(args[++i]);
+                            break;
+                        case "--publicAPI":
+                            publicAPI = true;
+                            break;
+                        case "--additionalResources":
+                            additionalResources =  Paths.get(args[++i]);
                             break;
                         default:
                             throw new IllegalArgumentException("Unknown option " + args[i]);

@@ -24,12 +24,12 @@ public class SwaggerOptions {
     public static final String RENDER_SWAGGER_TAGS = "renderSwaggerTags";
     public static final String SWAGGER_TAGS_PATH_OFFSET = "swaggerTagsPathOffset";
     public static final String JSON_PATCH = "jsonPatch";
-
+    
     private static final String DEFAULT_DOMAIN = "";
     private static final Set<SwaggerScheme> DEFAULT_SCHEMES = EnumSet.of(SwaggerScheme.HTTP);
     private static final boolean DEFAULT_RENDER_TAGS = false;
     private static final int DEFAULT_TAGS_PATH_OFFSET = 0;
-
+    
     /**
      * The deployed domain of the project.
      */
@@ -55,7 +55,7 @@ public class SwaggerOptions {
      * The optional JSON patch (RFC 6902) that can modify the Swagger JSON output.
      */
     private JsonPatch jsonPatch;
-
+    
     String getDomain() {
         return domain;
     }
